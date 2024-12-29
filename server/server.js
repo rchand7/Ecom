@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const path = require("path");  // Add path module for serving static files
+
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
@@ -15,20 +17,19 @@ const shopReviewRouter = require("./routes/shop/review-routes");
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
 
-//create a database connection -> u can also
-//create a separate file for this and then import/use that file here
-
+// Create a database connection
 mongoose
-  .connect("db_url")
+  .connect(process.env.MONGO_URI) // Use the environment variable for Mongo URI
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173", // Use environment variable or fallback to localhost for dev
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
@@ -37,12 +38,15 @@ app.use(
       "Expires",
       "Pragma",
     ],
-    credentials: true,
+    credentials: true, // Allow cookies
   })
 );
 
+// Middleware
 app.use(cookieParser());
 app.use(express.json());
+
+// Routes
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
@@ -56,4 +60,19 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
+// Preflight handling (for OPTIONS requests)
+app.options('*', cors());  // Allow preflight requests for all routes
+
+// Serve static files for production (client build folder)
+if (process.env.NODE_ENV === "production") {
+  // Serve the static files from the frontend build (client/dist)
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+  
+  // Catch-all route to serve the frontend's index.html file for any unmatched route
+  app.get("*", (_, res) => {
+    res.sendFile(path.resolve(__dirname, "../client", "dist", "index.html"));
+  });
+}
+
+// Start server
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
