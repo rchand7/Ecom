@@ -4,13 +4,13 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "npm run build --prefix client && node server/server.js", 
-    "build": "npm install && npm install --prefix client && npm run build --prefix client", 
+    "dev": "npm run build --prefix client && node server/server.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
     "start": "node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cd client && npm install"  // Automatically installs client dependencies after server install
+    "postinstall": "cd client && npm install" 
   },
-  "author": "Rohit Chand",
+  "author": "sangam mukherjee",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
