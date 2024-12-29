@@ -1,13 +1,9 @@
-import path from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+  define: {
+    'process.env': process.env
   },
+  envPrefix: 'VITE_' // This ensures only VITE_ variables are exposed to Vite
 });
