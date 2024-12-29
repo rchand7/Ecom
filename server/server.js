@@ -1,8 +1,9 @@
+require('dotenv').config(); // Load environment variables
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const path = require("path");  // Add path module for serving static files
+const path = require("path"); 
 
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
@@ -17,11 +18,14 @@ const shopReviewRouter = require("./routes/shop/review-routes");
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
 
+// Log environment variable for debugging
+console.log('MONGO_URI:', process.env.MONGO_URI);
+
 // Create a database connection
 mongoose
   .connect(process.env.MONGO_URI) // Use the environment variable for Mongo URI
   .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+  .catch((error) => console.log("MongoDB connection error:", error));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,14 +54,12 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/admin/orders", adminOrderRouter);
-
 app.use("/api/shop/products", shopProductsRouter);
 app.use("/api/shop/cart", shopCartRouter);
 app.use("/api/shop/address", shopAddressRouter);
 app.use("/api/shop/order", shopOrderRouter);
 app.use("/api/shop/search", shopSearchRouter);
 app.use("/api/shop/review", shopReviewRouter);
-
 app.use("/api/common/feature", commonFeatureRouter);
 
 // Preflight handling (for OPTIONS requests)
@@ -65,10 +67,7 @@ app.options('*', cors());  // Allow preflight requests for all routes
 
 // Serve static files for production (client build folder)
 if (process.env.NODE_ENV === "production") {
-  // Serve the static files from the frontend build (client/dist)
   app.use(express.static(path.join(__dirname, "../client/dist")));
-  
-  // Catch-all route to serve the frontend's index.html file for any unmatched route
   app.get("*", (_, res) => {
     res.sendFile(path.resolve(__dirname, "../client", "dist", "index.html"));
   });
